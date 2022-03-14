@@ -1,0 +1,16 @@
+{
+  "version": 0.1,
+  "name": "wp-theme-downloader",
+  "builds": [
+    {
+      "src": "dist/main.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "dist/main.ts"
+    }
+  ]
+}
