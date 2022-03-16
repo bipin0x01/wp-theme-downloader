@@ -8,10 +8,16 @@ import { td } from './theme-downloader.dto';
 export class ThemeDownloaderController {
   constructor(private ThemeDownload: ThemeDownloaderService) {}
 
-  @Post('/theme')
+  @Post('/theme/download')
   public async theme(@Body() td: td) {
     const siteLink = td.link;
     return this.ThemeDownload.themeLinkGenerator(siteLink);
+  }
+
+  @Post('/theme/info')
+  public async themeInfo(@Body() td: td) {
+    const siteLink = td.link;
+    return this.ThemeDownload.themeInfo(siteLink);
   }
 
   @Post('/plugins')

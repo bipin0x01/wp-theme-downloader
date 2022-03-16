@@ -80,7 +80,11 @@ export class ThemeDownloaderService {
 
       const theme = await this.themeGenerator(siteLink, links);
 
-      return theme;
+      return {
+        status: theme.status,
+        message: theme.message,
+        url: theme.url,
+      };
     } catch (error) {
       return {
         status: 'error',
@@ -121,6 +125,53 @@ export class ThemeDownloaderService {
           'Something went wrong! Please check the website url and try again.',
         plugins: null,
       };
+    }
+  }
+
+  public async themeInfo(siteLink: string) {
+    // Get stylesheet link from the given url
+    const themeLink = await this.themeLinkGenerator(siteLink);
+    // remove .zip extension from the theme link
+    const themeFolder = themeLink.url.split('/').pop().replace('.zip', '');
+
+    // get the stylesheet link
+    const stylesheetLink = `${siteLink}/wp-content/themes/${themeFolder}/style.css`;
+
+    // get the stylesheet content
+    const stylesheetResponse = await axios.get(stylesheetLink);
+    try {
+      if (stylesheetResponse) {
+        const styles = stylesheetResponse?.data?.split('\n');
+        // get the theme name
+        const themeName = styles.find((style) => style.includes('Theme Name:'));
+        // get the theme author
+        const themeAuthor = styles.find((style) => style.includes('Author:'));
+
+        // get the author link
+        const themeAuthorLink = styles.find((style) =>
+          style.includes('Author URI:'),
+        );
+        // get the theme version
+        const themeVersion = styles.find((style) => style.includes('Version:'));
+        // get tags
+        const themeTags = styles.find((style) => style.includes('Tags:'));
+        const tagsArray = themeTags ? themeTags.split(':')[1].split(',') : [];
+        // remove spaces from elements of  the tags array
+        const tags = tagsArray?.map((tag) => tag.trim());
+        return {
+          theme: themeName?.split(':')[1].trim(),
+          version: themeVersion?.split(':')[1].trim(),
+          author: themeAuthor?.split(':')[1].trim(),
+          authorLink: themeAuthorLink
+            ? themeAuthorLink.split(':')[1].trim() +
+              ':' +
+              themeAuthorLink.split(':')[2].trim()
+            : null,
+          tags: tags,
+        };
+      }
+    } catch (error) {
+      return error;
     }
   }
 
