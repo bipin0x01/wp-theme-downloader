@@ -137,6 +137,8 @@ export class ThemeDownloaderService {
     // get the stylesheet link
     const stylesheetLink = `${siteLink}/wp-content/themes/${themeFolder}/style.css`;
 
+    // get screenshot link
+    const screenshotLink = `${siteLink}/wp-content/themes/${themeFolder}/screenshot.png`;
     // get the stylesheet content
     const stylesheetResponse = await axios.get(stylesheetLink);
     try {
@@ -161,6 +163,7 @@ export class ThemeDownloaderService {
         return {
           theme: themeName?.split(':')[1].trim(),
           version: themeVersion?.split(':')[1].trim(),
+          screenshot: screenshotLink,
           author: themeAuthor?.split(':')[1].trim(),
           authorLink: themeAuthorLink
             ? themeAuthorLink.split(':')[1].trim() +
