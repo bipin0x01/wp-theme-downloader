@@ -9,8 +9,19 @@ export class ThemeDownloaderController {
   constructor(private ThemeDownload: ThemeDownloaderService) {}
 
   @Post('/theme')
-  public async download(@Body() td: td) {
+  public async theme(@Body() td: td) {
     const siteLink = td.link;
     return this.ThemeDownload.themeLinkGenerator(siteLink);
+  }
+
+  @Post('/plugins')
+  public async plugins(@Body() td: td) {
+    const siteLink = td.link;
+    const getPlugins = await this.ThemeDownload.pluginsDetector(siteLink);
+    if (getPlugins.status === 'success') {
+      const allPlugins = getPlugins?.plugins;
+      const pluginDetails = this.ThemeDownload.pluginDetails(allPlugins);
+      return pluginDetails;
+    }
   }
 }

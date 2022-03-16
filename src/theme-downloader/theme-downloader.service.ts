@@ -90,4 +90,57 @@ export class ThemeDownloaderService {
       };
     }
   }
+
+  public async pluginsDetector(siteLink: string) {
+    try {
+      const links = await this.getLinksFromSite(siteLink);
+
+      const plugins = links.filter((link) =>
+        link.includes('/wp-content/plugins/'),
+      );
+
+      // strip the plugins name from the plugins array and return the array
+      const pluginsName = plugins.map((plugin) => {
+        const pluginName = plugin.split('/');
+        const pluginIndex = pluginName.indexOf('plugins');
+        return pluginName[pluginIndex + 1];
+      });
+      // delete duplicate elements from the plugins array
+      const pluginsList = [...new Set(pluginsName)];
+
+      return {
+        status: 'success',
+        message:
+          'Success! We found some plugins for you. Please check the plugins list.',
+        plugins: pluginsList,
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message:
+          'Something went wrong! Please check the website url and try again.',
+        plugins: null,
+      };
+    }
+  }
+
+  public async pluginDetails(pluginsList: string[]) {
+    try {
+      const plugins = pluginsList.map(async (plugin) => {
+        const pluginUrl = `https://wordpress.org/plugins/${plugin}/`;
+        const pluginResponse = await axios.get(pluginUrl);
+        const $ = cheerio.load(pluginResponse.data);
+        const pluginDetails = {
+          name: plugin,
+          description: $('.plugin-description').text().split('.')[0] + '.',
+          downloadLink: $('.plugin-download').attr('href'),
+        };
+        return pluginDetails;
+      });
+      const allPluginsDetails = await Promise.all(plugins);
+      return allPluginsDetails;
+    } catch (error) {
+      return error;
+    }
+  }
 }
