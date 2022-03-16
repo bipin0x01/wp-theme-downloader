@@ -13,7 +13,7 @@ export class ThemeDownloaderService {
   private async getLinksFromSite(url: string) {
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
-    let links = [];
+    const links = [];
     $('link').each((i, link) => {
       links.push($(link).attr('href'));
     });
