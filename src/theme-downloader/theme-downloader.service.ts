@@ -184,9 +184,12 @@ export class ThemeDownloaderService {
         const pluginUrl = `https://wordpress.org/plugins/${plugin}/`;
         const pluginResponse = await axios.get(pluginUrl);
         const $ = cheerio.load(pluginResponse.data);
+
+        // get the plugin name
+        const pluginName = $('.plugin-title').text();
         const bannerImg = `https://ps.w.org/${plugin}/assets/banner-772x250.png`;
         const pluginDetails = {
-          name: plugin,
+          name: pluginName,
           description: $('.plugin-description').text().split('.')[0] + '.',
           banner: bannerImg,
           downloadLink: $('.plugin-download').attr('href'),
