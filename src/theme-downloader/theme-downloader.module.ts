@@ -4,6 +4,6 @@ import { ThemeDownloaderService } from './theme-downloader.service';
 
 @Module({
   controllers: [ThemeDownloaderController],
-  providers: [ThemeDownloaderService]
+  providers: [ThemeDownloaderService],
 })
 export class ThemeDownloaderModule {}

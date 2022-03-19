@@ -9,7 +9,9 @@ describe('ThemeDownloaderController', () => {
       controllers: [ThemeDownloaderController],
     }).compile();
 
-    controller = module.get<ThemeDownloaderController>(ThemeDownloaderController);
+    controller = module.get<ThemeDownloaderController>(
+      ThemeDownloaderController,
+    );
   });
 
   it('should be defined', () => {
