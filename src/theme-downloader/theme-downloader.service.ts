@@ -132,6 +132,7 @@ export class ThemeDownloaderService {
     // Get stylesheet link from the given url
     const themeLink = await this.themeLinkGenerator(siteLink);
     // remove .zip extension from the theme link
+    console.log(themeLink);
     const themeFolder = themeLink.url.split('/').pop().replace('.zip', '');
 
     // get the stylesheet link
@@ -186,13 +187,18 @@ export class ThemeDownloaderService {
         const $ = cheerio.load(pluginResponse.data);
 
         // get the plugin name
-        const pluginName = $('.plugin-title').text();
-        const bannerImg = `https://ps.w.org/${plugin}/assets/banner-772x250.png`;
+        const plugin_name = $('.plugin-title').text();
+        const description = $('.plugin-description').text().split('.')[0] + '.';
+
+        // remove Description: from the description
+        const desc = description.replace('\n\tDescription\n\t', '');
+        const banner = `https://ps.w.org/${plugin}/assets/banner-772x250.png`;
+        const download_link = $('.plugin-download').attr('href');
         const pluginDetails = {
-          name: pluginName,
-          description: $('.plugin-description').text().split('.')[0] + '.',
-          banner: bannerImg,
-          downloadLink: $('.plugin-download').attr('href'),
+          plugin_name,
+          desc,
+          banner,
+          download_link,
         };
         return pluginDetails;
       });
