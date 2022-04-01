@@ -9,6 +9,7 @@ export class ThemeDownloaderService {
   //     return link;
   //   }
 
+  // @author Bipin Thapa
   // Get all the links from the given url
   private async getLinksFromSite(url: string) {
     const response = await axios.get(url);
@@ -20,6 +21,7 @@ export class ThemeDownloaderService {
     return links;
   }
 
+  // @author Bipin Thapa
   // Generate theme download link for the given website url
   private async themeGenerator(siteLink: string, links: string[]) {
     //   strip the input url of the domain name and only get the name
@@ -49,19 +51,22 @@ export class ThemeDownloaderService {
       const themeName = themePath[themesIndex + 1] + '.zip';
       const themeUrl = `${siteLink}/wp-content/themes/${themeName}`;
 
-      const checkTheme = await axios.get(themeUrl);
-      return checkTheme.status === 200
-        ? {
-            status: 'success',
-            message: 'Theme found!',
-            url: themeUrl.toString(),
-          }
-        : {
+      try {
+        const checkTheme = await axios.get(themeUrl);
+        return {
+          status: 'success',
+          message: 'Theme found!',
+          theme_url: themeUrl,
+        };
+      } catch (error) {
+        if (error.response) {
+          return {
             status: 'error',
-            message:
-              "Theme not found! Seems like There's nothing left for you.",
-            url: null,
+            message: 'Theme not found!',
+            theme_url: themeUrl,
           };
+        }
+      }
     }
 
     if (!wpSiteValidator) {
@@ -69,29 +74,24 @@ export class ThemeDownloaderService {
       return {
         status: 'error',
         message: 'It is not an wordpress website',
-        url: null,
+        theme_url: null,
       };
     }
   }
 
+  // @author Bipin Thapa
+  // @description: This function will generate the theme link for the given website.
   public async themeLinkGenerator(siteLink: string) {
     try {
       const links = await this.getLinksFromSite(siteLink);
-
       const theme = await this.themeGenerator(siteLink, links);
-
       return {
         status: theme.status,
         message: theme.message,
-        url: theme.url,
+        url: theme.theme_url,
       };
     } catch (error) {
-      return {
-        status: 'error',
-        message:
-          'Something went wrong! Please check the website url and try again.',
-        url: null,
-      };
+      return error;
     }
   }
 
@@ -128,57 +128,59 @@ export class ThemeDownloaderService {
     }
   }
 
+  // @author Bipin Thapa
+  // @description: This function will return the plugins list used in the given website
+  // @route: /theme/info
   public async themeInfo(siteLink: string) {
     // Get stylesheet link from the given url
     const themeLink = await this.themeLinkGenerator(siteLink);
-    // remove .zip extension from the theme link
-    console.log(themeLink);
-    const themeFolder = themeLink.url.split('/').pop().replace('.zip', '');
 
+    // remove .zip extension from the theme link
+    const themeName = themeLink?.url?.split('/')?.pop()?.replace('.zip', '');
     // get the stylesheet link
-    const stylesheetLink = `${siteLink}/wp-content/themes/${themeFolder}/style.css`;
+    const stylesheetLink = `${siteLink}/wp-content/themes/${themeName}/style.css`;
 
     // get screenshot link
-    const screenshotLink = `${siteLink}/wp-content/themes/${themeFolder}/screenshot.png`;
+    const screenshotLink = `${siteLink}/wp-content/themes/${themeName}/screenshot.png`;
+
     // get the stylesheet content
     const stylesheetResponse = await axios.get(stylesheetLink);
-    try {
-      if (stylesheetResponse) {
-        const styles = stylesheetResponse?.data?.split('\n');
-        // get the theme name
-        const themeName = styles.find((style) => style.includes('Theme Name:'));
-        // get the theme author
-        const themeAuthor = styles.find((style) => style.includes('Author:'));
 
-        // get the author link
-        const themeAuthorLink = styles.find((style) =>
-          style.includes('Author URI:'),
-        );
-        // get the theme version
-        const themeVersion = styles.find((style) => style.includes('Version:'));
-        // get tags
-        const themeTags = styles.find((style) => style.includes('Tags:'));
-        const tagsArray = themeTags ? themeTags.split(':')[1].split(',') : [];
-        // remove spaces from elements of  the tags array
-        const tags = tagsArray?.map((tag) => tag.trim());
-        return {
-          theme: themeName?.split(':')[1].trim(),
-          version: themeVersion?.split(':')[1].trim(),
-          screenshot: screenshotLink,
-          author: themeAuthor?.split(':')[1].trim(),
-          authorLink: themeAuthorLink
-            ? themeAuthorLink.split(':')[1].trim() +
-              ':' +
-              themeAuthorLink.split(':')[2].trim()
-            : null,
-          tags: tags,
-        };
-      }
-    } catch (error) {
-      return error;
+    if (stylesheetResponse) {
+      const styles = stylesheetResponse?.data?.split('\n');
+      // get the theme name
+      const themeName = styles.find((style) => style.includes('Theme Name:'));
+      // get the theme author
+      const themeAuthor = styles.find((style) => style.includes('Author:'));
+
+      // get the author link
+      const themeAuthorLink = styles.find((style) =>
+        style.includes('Author URI:'),
+      );
+      // get the theme version
+      const themeVersion = styles.find((style) => style.includes('Version:'));
+      // get tags
+      const themeTags = styles.find((style) => style.includes('Tags:'));
+      const tagsArray = themeTags ? themeTags.split(':')[1].split(',') : [];
+      // remove spaces from elements of  the tags array
+      const tags = tagsArray?.map((tag) => tag.trim());
+      return {
+        theme: themeName?.split(':')[1].trim(),
+        version: themeVersion?.split(':')[1].trim(),
+        screenshot: screenshotLink,
+        author: themeAuthor?.split(':')[1].trim(),
+        authorLink: themeAuthorLink
+          ? themeAuthorLink.split(':')[1].trim() +
+            ':' +
+            themeAuthorLink.split(':')[2].trim()
+          : null,
+        tags: tags,
+      };
     }
   }
 
+  // @author Bipin Thapa
+  // @description: This function will return the plugins list from the given url
   public async pluginDetails(pluginsList: string[]) {
     try {
       const plugins = pluginsList.map(async (plugin) => {
