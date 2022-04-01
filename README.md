@@ -6,4 +6,4 @@ It helps to download wp theme from any wordpress sites If the theme zip file is 
 
 https://documenter.getpostman.com/view/14057887/UVysvugc
 
-https://github.com/bipin0x01/wp-theme-downloader/blob/main/docs/api_endpoints.JPG
+![API Endpoints](https://github.com/bipin0x01/wp-theme-downloader/blob/main/docs/api_endpoints.JPG)
