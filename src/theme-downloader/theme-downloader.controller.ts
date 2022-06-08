@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Render, Header } from '@nestjs/common';
+import { Controller, Post, Body, Get, Render, Header, HttpCode } from '@nestjs/common';
 import { ThemeDownloaderService } from './theme-downloader.service';
 
 // types
