@@ -3,6 +3,9 @@ import axios from 'axios';
 // cheerio for html parsing
 import cheerio from 'cheerio';
 
+async function checkLink(url) {
+  return (await fetch(url)).ok;
+}
 @Injectable()
 export class ThemeDownloaderService {
   //   public download(link: string): string {
@@ -25,7 +28,9 @@ export class ThemeDownloaderService {
   // Generate theme download link for the given website url
   private async themeGenerator(siteLink: string, links: string[]) {
     //   strip the input url of the domain name and only get the name
-    const name = siteLink.replace(/^(?:https?:\/\/)?(?:www\.)?/i, '');
+    let name = siteLink.replace(/^(?:https?:\/\/)?(?:www\.)?/i, '');
+
+    // set the name to the domain name
 
     // regex pattern to match the style.css file
     const wpSite = new RegExp(
@@ -142,6 +147,9 @@ export class ThemeDownloaderService {
 
     // get screenshot link
     const screenshotLink = `${siteLink}/wp-content/themes/${themeName}/screenshot.png`;
+    const validScreenshot = checkLink(screenshotLink)
+      ? screenshotLink
+      : screenshotLink.replace('.png', '.jpg');
 
     // get the stylesheet content
     const stylesheetResponse = await axios.get(stylesheetLink);
@@ -167,7 +175,7 @@ export class ThemeDownloaderService {
       return {
         theme: themeName?.split(':')[1].trim(),
         version: themeVersion?.split(':')[1].trim(),
-        screenshot: screenshotLink,
+        screenshot: validScreenshot,
         author: themeAuthor?.split(':')[1].trim(),
         authorLink: themeAuthorLink
           ? themeAuthorLink.split(':')[1].trim() +
@@ -195,11 +203,14 @@ export class ThemeDownloaderService {
         // remove Description: from the description
         const desc = description.replace('\n\tDescription\n\t', '');
         const banner = `https://ps.w.org/${plugin}/assets/banner-772x250.png`;
+        const validBanner = checkLink(banner)
+          ? banner
+          : banner.replace('.png', '.jpg');
         const download_link = $('.plugin-download').attr('href');
         const pluginDetails = {
           plugin_name,
           desc,
-          banner,
+          validBanner,
           download_link,
         };
         return pluginDetails;
@@ -210,4 +221,7 @@ export class ThemeDownloaderService {
       return error;
     }
   }
+}
+function reverseIpLookup(siteLink: string) {
+  throw new Error('Function not implemented.');
 }
