@@ -3,9 +3,6 @@ import axios from 'axios';
 // cheerio for html parsing
 import cheerio from 'cheerio';
 
-async function checkLink(url) {
-  return (await fetch(url)).ok;
-}
 @Injectable()
 export class ThemeDownloaderService {
   //   public download(link: string): string {
@@ -147,9 +144,6 @@ export class ThemeDownloaderService {
 
     // get screenshot link
     const screenshotLink = `${siteLink}/wp-content/themes/${themeName}/screenshot.png`;
-    const validScreenshot = checkLink(screenshotLink)
-      ? screenshotLink
-      : screenshotLink.replace('.png', '.jpg');
 
     // get the stylesheet content
     const stylesheetResponse = await axios.get(stylesheetLink);
@@ -175,7 +169,7 @@ export class ThemeDownloaderService {
       return {
         theme: themeName?.split(':')[1].trim(),
         version: themeVersion?.split(':')[1].trim(),
-        screenshot: validScreenshot,
+        screenshot: screenshotLink,
         author: themeAuthor?.split(':')[1].trim(),
         authorLink: themeAuthorLink
           ? themeAuthorLink.split(':')[1].trim() +
@@ -203,14 +197,12 @@ export class ThemeDownloaderService {
         // remove Description: from the description
         const desc = description.replace('\n\tDescription\n\t', '');
         const banner = `https://ps.w.org/${plugin}/assets/banner-772x250.png`;
-        const validBanner = checkLink(banner)
-          ? banner
-          : banner.replace('.png', '.jpg');
+
         const download_link = $('.plugin-download').attr('href');
         const pluginDetails = {
           plugin_name,
           desc,
-          validBanner,
+          banner,
           download_link,
         };
         return pluginDetails;
@@ -221,7 +213,4 @@ export class ThemeDownloaderService {
       return error;
     }
   }
-}
-function reverseIpLookup(siteLink: string) {
-  throw new Error('Function not implemented.');
 }
